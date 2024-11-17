@@ -1,49 +1,76 @@
-/*
-In this problem, you will be implementing the Knuth Morris Pratt (KMP) algorithm as dicussed in class
-Complete the functions 'computeLPSArray' and 'KMPSearch' where the former preprocesses the query
-and the latter prints all occurences of the target pattern in the string. 
-
-You can use the print statement already provided to match the output format (You can write your own print statement too)
-
-Running Instructions
-Run make to compile your code.
-Run make test to test your code on the provided testcase
-
-Input Format
-2 line input.
-First line contains pattern
-Second line contains text.
-No whitespace or newline characters withing either string.
-(To add support for whitespace, you will have to change main.cpp, you can try doing this on your own OPTIONALLY)
-
-Output Format
-Provided in outputs/output0.txt.
-Multiple occurences can be possible and will be printed on SEPARATE LINES in the same way.
-
-Please also test the code with your OWN test cases.
-
-- We will test both KMPSearch and computeKMPTable function.
-  Please do not change their definitions.
-
-- Please note that we will ONLY copy kmp.cpp to our auto-grader.
-  Any modification to any other file will not be part of the
-  evaluation of the submission. Please make sure that your
-  submission continue to work with the original version of
-  the other files.
-*/
-
-
 #include <iostream>
 #include <cstring>
 
-// Fills h[] for given pattern pat[0..M-1]
-void computeKMPTable(char* pat, int M, int* h)
+// Fills lps[] for given pattern pat[0..M-1]
+void computeLPSArray(char* pat, int M, int* lps)
 {
+	// length of the previous longest prefix suffix
+	int len = 0;
 
+	lps[0] = 0; // lps[0] is always 0
+
+	// the loop calculates lps[i] for i = 1 to M-1
+	int i = 1;
+	while (i < M) {
+		if (pat[i] == pat[len]) {
+			len++;
+			lps[i] = len;
+			i++;
+		}
+		else // (pat[i] != pat[len])
+		{
+			// This is tricky. Consider the example.
+			// AAACAAAA and i = 7. The idea is similar
+			// to search step.
+			if (len != 0) {
+				len = lps[len - 1];
+
+				// Also, note that we do not increment
+				// i here
+			}
+			else // if (len == 0)
+			{
+				lps[i] = 0;
+				i++;
+			}
+		}
+	}
 }
 
 // Prints occurrences of txt[] in pat[]
 void KMPSearch(char* pat, char* txt)
 {
-	// printf("Found pattern at index %d \n", index_where_found);
+	int M = strlen(pat);
+	int N = strlen(txt);
+
+	// create lps[] that will hold the longest prefix suffix
+	// values for pattern
+	int lps[M];
+
+	// Preprocess the pattern (calculate lps[] array)
+	computeLPSArray(pat, M, lps);
+
+	int i = 0; // index for txt[]
+	int j = 0; // index for pat[]
+	while ((N - i) >= (M - j)) {
+		if (pat[j] == txt[i]) {
+			j++;
+			i++;
+		}
+
+		if (j == M) {
+			printf("Found pattern at index %d \n", i - j);
+			j = lps[j - 1];
+		}
+
+		// mismatch after j matches
+		else if (i < N && pat[j] != txt[i]) {
+			// Do not match lps[0..lps[j-1]] characters,
+			// they will match anyway
+			if (j != 0)
+				j = lps[j - 1];
+			else
+				i = i + 1;
+		}
+	}
 }

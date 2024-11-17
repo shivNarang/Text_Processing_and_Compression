@@ -12,6 +12,9 @@ int main()
     std::cin.getline(pat, maxSize); // Read the first character array
     std::cin.getline(txt, maxSize); // Read the second character array
 
+	// char txt[] = "ABABDABACDABABCABAB";
+	// char pat[] = "ABABCABAB";
+
 	KMPSearch(pat, txt);
 	return 0;
 }
